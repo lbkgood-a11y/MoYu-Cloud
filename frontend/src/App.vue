@@ -16,10 +16,13 @@ const users = ref<User[]>([]);
 const roles = ref<Role[]>([]);
 const logs = ref<OperationLog[]>([]);
 const activeView = ref<'customers' | 'users' | 'roles' | 'logs'>('customers');
+const menuView = ref(false);
 const newUser = ref({ username: '', password: '' });
 const userDialogVisible = ref(false);
 const roleDialogVisible = ref(false);
 const newRole = ref({ roleCode: '', roleName: '' });
+const newMenu = ref({ parentId: 0, menuName: '', permission: '', menuType: 'M' });
+const menuDialogVisible = ref(false);
 const menus = ref<Menu[]>([]);
 const selectedMenuIds = ref<number[]>([]);
 const permissionRole = ref<Role | null>(null);
@@ -74,6 +77,18 @@ async function loadRoles() {
 async function loadLogs() {
   try { logs.value = (await api.get('/audit/logs')).data.data; }
   catch { ElMessage.error('操作日志加载失败'); }
+}
+
+/** 创建菜单权限。 */
+async function createMenu() {
+  try { await api.post('/system/menus', newMenu.value); menuDialogVisible.value = false; newMenu.value = { parentId: 0, menuName: '', permission: '', menuType: 'M' }; ElMessage.success('菜单创建成功'); await loadMenus(); }
+  catch { ElMessage.error('菜单创建失败'); }
+}
+
+/** 查询菜单列表。 */
+async function loadMenus() {
+  try { menus.value = (await api.get('/system/menus')).data.data; }
+  catch { ElMessage.error('菜单加载失败'); }
 }
 
 /** 创建角色。 */
@@ -164,8 +179,8 @@ onMounted(async () => {
 <template>
   <el-container v-if="loggedIn" class="layout">
     <el-header><span class="brand">MoYu-Cloud</span><el-button link @click="logout">退出</el-button></el-header>
-    <el-main><el-card><template #header><div class="card-header"><div><el-button :type="activeView === 'customers' ? 'primary' : 'default'" @click="activeView = 'customers'">客户管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'users' ? 'primary' : 'default'" @click="activeView = 'users'; loadUsers()">用户管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'roles' ? 'primary' : 'default'" @click="activeView = 'roles'; loadRoles()">角色管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'logs' ? 'primary' : 'default'" @click="activeView = 'logs'; loadLogs()">操作日志</el-button></div><el-button v-if="activeView === 'customers' && hasPermission('customer:write')" type="primary" @click="openCustomerForm()">新增客户</el-button><el-button v-if="activeView === 'users' && hasPermission('system:user:write')" type="primary" @click="userDialogVisible = true">新增用户</el-button><el-button v-if="activeView === 'roles' && hasPermission('system:user:write')" type="primary" @click="roleDialogVisible = true">新增角色</el-button></div></template>
-    <el-table v-if="activeView === 'customers'" v-loading="loading" :data="customers" stripe>
+    <el-main><el-card><template #header><div class="card-header"><div><el-button :type="activeView === 'customers' && !menuView ? 'primary' : 'default'" @click="menuView = false; activeView = 'customers'">客户管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'users' ? 'primary' : 'default'" @click="menuView = false; activeView = 'users'; loadUsers()">用户管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'roles' ? 'primary' : 'default'" @click="menuView = false; activeView = 'roles'; loadRoles()">角色管理</el-button><el-button v-if="hasPermission('system:user:read')" :type="activeView === 'logs' ? 'primary' : 'default'" @click="menuView = false; activeView = 'logs'; loadLogs()">操作日志</el-button><el-button v-if="hasPermission('system:user:read')" :type="menuView ? 'primary' : 'default'" @click="menuView = true; activeView = 'customers'; loadMenus()">菜单管理</el-button></div><el-button v-if="!menuView && activeView === 'customers' && hasPermission('customer:write')" type="primary" @click="openCustomerForm()">新增客户</el-button><el-button v-if="!menuView && activeView === 'users' && hasPermission('system:user:write')" type="primary" @click="userDialogVisible = true">新增用户</el-button><el-button v-if="!menuView && activeView === 'roles' && hasPermission('system:user:write')" type="primary" @click="roleDialogVisible = true">新增角色</el-button><el-button v-if="menuView && hasPermission('system:user:write')" type="primary" @click="menuDialogVisible = true">新增菜单</el-button></div></template>
+    <el-table v-if="menuView" :data="menus" stripe><el-table-column prop="id" label="编号" width="90"/><el-table-column prop="menuName" label="菜单名称"/><el-table-column prop="permission" label="权限标识"/><el-table-column prop="menuType" label="类型" width="90"/><el-table-column label="状态"><template #default="scope"><el-tag type="success">{{ scope.row.enabled ? '启用' : '禁用' }}</el-tag></template></el-table-column></el-table><el-table v-else-if="activeView === 'customers'" v-loading="loading" :data="customers" stripe>
       <el-table-column prop="id" label="编号" width="90"/><el-table-column prop="name" label="客户名称"/>
       <el-table-column prop="contact" label="联系人"/><el-table-column prop="phone" label="联系电话"/><el-table-column prop="status" label="状态"/>
       <el-table-column label="操作" width="150"><template #default="scope"><el-button v-if="hasPermission('customer:write')" link type="primary" @click="openCustomerForm(scope.row)">编辑</el-button><el-button v-if="hasPermission('customer:write')" link type="danger" @click="removeCustomer(scope.row)">删除</el-button></template></el-table-column>
@@ -174,6 +189,7 @@ onMounted(async () => {
     <el-dialog v-model="userDialogVisible" title="新增用户" width="400px"><el-form label-width="70px"><el-form-item label="用户名"><el-input v-model="newUser.username" /></el-form-item><el-form-item label="密码"><el-input v-model="newUser.password" type="password" show-password /></el-form-item></el-form><template #footer><el-button @click="userDialogVisible = false">取消</el-button><el-button type="primary" @click="createUser">保存</el-button></template></el-dialog>
     <el-dialog v-model="roleDialogVisible" title="新增角色" width="400px"><el-form label-width="80px"><el-form-item label="角色编码"><el-input v-model="newRole.roleCode" /></el-form-item><el-form-item label="角色名称"><el-input v-model="newRole.roleName" /></el-form-item></el-form><template #footer><el-button @click="roleDialogVisible = false">取消</el-button><el-button type="primary" @click="createRole">保存</el-button></template></el-dialog>
     <el-dialog v-model="permissionDialogVisible" :title="`菜单授权 - ${permissionRole?.roleName ?? ''}`" width="460px"><el-checkbox-group v-model="selectedMenuIds"><el-checkbox v-for="menu in menus" :key="menu.id" :label="menu.id">{{ menu.menuName }}<span v-if="menu.permission" class="permission">（{{ menu.permission }}）</span></el-checkbox></el-checkbox-group><template #footer><el-button @click="permissionDialogVisible = false">取消</el-button><el-button type="primary" @click="savePermission">保存</el-button></template></el-dialog>
+    <el-dialog v-model="menuDialogVisible" title="新增菜单" width="420px"><el-form label-width="90px"><el-form-item label="菜单名称"><el-input v-model="newMenu.menuName" /></el-form-item><el-form-item label="权限标识"><el-input v-model="newMenu.permission" placeholder="例如 customer:read" /></el-form-item><el-form-item label="菜单类型"><el-select v-model="newMenu.menuType" style="width: 100%"><el-option label="菜单" value="M"/><el-option label="按钮" value="B"/></el-select></el-form-item></el-form><template #footer><el-button @click="menuDialogVisible = false">取消</el-button><el-button type="primary" @click="createMenu">保存</el-button></template></el-dialog>
   </el-container>
   <el-main v-else class="login-page"><el-card class="login-card"><h2>MoYu-Cloud 控制台</h2><p>让开发少走弯路，让系统快速落座</p>
     <el-form @submit.prevent="login"><el-form-item><el-input v-model="username" placeholder="用户名"/></el-form-item><el-form-item><el-input v-model="password" type="password" placeholder="密码" show-password/></el-form-item><el-button type="primary" native-type="submit" class="full">登录</el-button></el-form>

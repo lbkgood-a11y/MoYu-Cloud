@@ -18,6 +18,11 @@ public class MenuEntity {
     private String menuType;
     private boolean enabled;
     protected MenuEntity() { }
+    /** 创建菜单权限实体。 */
+    public MenuEntity(Long parentId, String menuName, String permission, String menuType) {
+        this.parentId = parentId; this.menuName = menuName; this.permission = permission;
+        this.menuType = menuType; this.enabled = true;
+    }
     public Long getId() { return id; }
     public Long getParentId() { return parentId; }
     public String getMenuName() { return menuName; }
