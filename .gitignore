@@ -21,9 +21,9 @@ target/
 node_modules/
 __pycache__/
 *.tsbuildinfo
+*.DS_Store
 
 # Logs and local data
 *.log
 *.sqlite
 *.db
-

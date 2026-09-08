@@ -23,4 +23,11 @@ public class RoleMenuController {
         roleMenuService.assignMenus(roleId, request);
         return ApiResponse.success(null);
     }
+
+    @GetMapping("/{roleId}/menus")
+    public ApiResponse<java.util.List<Long>> findMenus(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                        @PathVariable Long roleId) {
+        authService.requirePermission(authorization, "system:user:read");
+        return ApiResponse.success(roleMenuService.findMenuIds(roleId));
+    }
 }

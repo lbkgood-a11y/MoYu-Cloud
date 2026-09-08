@@ -2,6 +2,8 @@
 
 ## 构建并启动
 
+可先复制根目录的 `.env.example` 为 `deploy/.env` 并修改敏感配置；不要将真实密码提交到 Git。
+
 在 `deploy` 目录执行：
 
 ```powershell

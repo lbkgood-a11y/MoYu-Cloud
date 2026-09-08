@@ -12,6 +12,9 @@ const loggedIn = ref(Boolean(localStorage.getItem('moyu_token')));
 const username = ref('admin');
 const password = ref('admin123');
 const customers = ref<Customer[]>([]);
+const customerKeyword = ref('');
+const customerPage = ref(1);
+const customerPageSize = ref(10);
 const users = ref<User[]>([]);
 const roles = ref<Role[]>([]);
 const logs = ref<OperationLog[]>([]);
@@ -58,7 +61,7 @@ function hasPermission(permission: string) { return permissions.value.includes(p
 /** 查询客户列表。 */
 async function loadCustomers() {
   loading.value = true;
-  try { customers.value = (await api.get('/customers')).data.data; }
+  try { customers.value = (await api.get('/customers', { params: { keyword: customerKeyword.value || undefined } })).data.data; customerPage.value = 1; }
   catch { ElMessage.error('客户数据加载失败'); }
   finally { loading.value = false; }
 }
@@ -109,7 +112,7 @@ async function openPermissionDialog(role: Role) {
   try {
     menus.value = (await api.get('/system/menus')).data.data;
     permissionRole.value = role;
-    selectedMenuIds.value = [];
+    selectedMenuIds.value = (await api.get(`/system/roles/${role.id}/menus`)).data.data;
     permissionDialogVisible.value = true;
   } catch { ElMessage.error('菜单加载失败'); }
 }
@@ -163,6 +166,8 @@ function openCustomerForm(customer?: Customer) {
 /** 保存客户信息。 */
 async function saveCustomer() {
   try {
+    if (!form.value.name.trim()) { ElMessage.warning('客户名称不能为空'); return; }
+    if (form.value.phone && !/^1\d{10}$/.test(form.value.phone)) { ElMessage.warning('请输入正确的手机号'); return; }
     if (editingId.value) await api.put(`/customers/${editingId.value}`, form.value);
     else await api.post('/customers', form.value);
     dialogVisible.value = false;

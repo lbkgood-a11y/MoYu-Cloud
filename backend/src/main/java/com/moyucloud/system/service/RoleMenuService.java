@@ -5,6 +5,7 @@ import com.moyucloud.system.dto.AssignMenuRequest;
 import com.moyucloud.system.repository.RoleMenuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 /** 角色菜单授权服务。 */
 @Service
@@ -17,5 +18,10 @@ public class RoleMenuService {
     public void assignMenus(Long roleId, AssignMenuRequest request) {
         roleMenuRepository.deleteByIdRoleId(roleId);
         request.menuIds().stream().map(menuId -> new RoleMenuEntity(roleId, menuId)).forEach(roleMenuRepository::save);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findMenuIds(Long roleId) {
+        return roleMenuRepository.findByIdRoleId(roleId).stream().map(item -> item.getId().getMenuId()).toList();
     }
 }
