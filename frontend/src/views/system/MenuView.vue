@@ -1,0 +1,12 @@
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'; import { ElMessage } from 'element-plus'; import { api } from '../../api'; import MenuForm from '../../components/MenuForm.vue'; import { useAuthStore } from '../../stores/auth';
+const auth=useAuthStore(); const menus=ref<any[]>([]); const dialog=ref(false); const editing=ref<any|null>(null);
+async function load(){try{menus.value=(await api.get('/system/menus')).data.data;}catch{ElMessage.error('菜单加载失败');}}
+function openCreate(){editing.value=null;dialog.value=true} function openEdit(row:any){editing.value=row;dialog.value=true}
+async function save(payload:any){try{if(editing.value) await api.put(`/system/menus/${editing.value.id}`,payload); else await api.post('/system/menus',payload);dialog.value=false;ElMessage.success('保存成功');await load();}catch{ElMessage.error('保存失败');}}
+async function remove(row:any){try{await api.delete(`/system/menus/${row.id}`);ElMessage.success('删除成功');await load();}catch{ElMessage.error('删除失败');}}
+async function toggle(row:any){try{await api.put(`/system/menus/${row.id}/enabled`,null,{params:{enabled:!row.enabled}});await load();}catch{ElMessage.error('状态更新失败');}}
+onMounted(async()=>{try{auth.setPermissions((await api.get('/auth/me')).data.data.permissions);}catch{} await load();});
+</script>
+<template><el-card><template #header><div class="header"><span>菜单管理</span><el-button v-if="auth.hasPermission('system:user:write')" type="primary" @click="openCreate">新增菜单</el-button></div></template><el-table :data="menus" stripe><el-table-column prop="id" label="编号" width="90"/><el-table-column prop="menuName" label="菜单名称"/><el-table-column prop="permission" label="权限标识"/><el-table-column prop="menuType" label="类型" width="90"/><el-table-column label="状态"><template #default="s"><el-tag :type="s.row.enabled?'success':'info'">{{s.row.enabled?'启用':'禁用'}}</el-tag></template></el-table-column><el-table-column v-if="auth.hasPermission('system:user:write')" label="操作" width="220"><template #default="s"><el-button link type="primary" @click="openEdit(s.row)">编辑</el-button><el-button link @click="toggle(s.row)">{{s.row.enabled?'禁用':'启用'}}</el-button><el-button link type="danger" @click="remove(s.row)">删除</el-button></template></el-table-column></el-table></el-card><MenuForm v-model="dialog" :menu="editing" @save="save"/></template>
+<style scoped>.header{display:flex;justify-content:space-between;align-items:center}</style>

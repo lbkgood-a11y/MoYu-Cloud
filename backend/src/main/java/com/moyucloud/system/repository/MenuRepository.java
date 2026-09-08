@@ -8,6 +8,8 @@ import java.util.List;
 
 /** 系统菜单数据访问接口。 */
 public interface MenuRepository extends JpaRepository<MenuEntity, Long> {
+    boolean existsByPermission(String permission);
+    boolean existsByPermissionAndIdNot(String permission, Long id);
     /** 查询用户通过角色拥有的权限标识。 */
     @Query(value = "SELECT DISTINCT m.permission FROM sys_menu m "
             + "JOIN sys_role_menu rm ON rm.menu_id = m.id "

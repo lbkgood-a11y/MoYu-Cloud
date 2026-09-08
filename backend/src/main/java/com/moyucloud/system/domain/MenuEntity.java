@@ -29,4 +29,6 @@ public class MenuEntity {
     public String getPermission() { return permission; }
     public String getMenuType() { return menuType; }
     public boolean isEnabled() { return enabled; }
+    public void update(Long parentId,String menuName,String permission,String menuType){this.parentId=parentId;this.menuName=menuName;this.permission=permission;this.menuType=menuType;}
+    public void setEnabled(boolean enabled){this.enabled=enabled;}
 }

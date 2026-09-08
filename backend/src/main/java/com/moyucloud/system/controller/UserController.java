@@ -7,8 +7,11 @@ import com.moyucloud.system.dto.CreateUserRequest;
 import com.moyucloud.system.dto.UserResponse;
 import com.moyucloud.system.dto.AssignRoleRequest;
 import com.moyucloud.system.service.UserService;
+import com.moyucloud.auth.service.RequiresPermission;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import com.moyucloud.shared.PageResponse;
+import com.moyucloud.shared.PageSupport;
 
 /** 用户管理接口。 */
 @RestController
@@ -26,8 +29,24 @@ public class UserController {
         return ApiResponse.success(userService.findAll());
     }
 
+    @GetMapping("/page")
+    @RequiresPermission("system:user:read")
+    public ApiResponse<PageResponse<UserResponse>> findPage(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+        authService.requirePermission(authorization, "system:user:read");
+        var result = userRepositoryPage(page, size);
+        return ApiResponse.success(result);
+    }
+
+    private PageResponse<UserResponse> userRepositoryPage(int page, int size) {
+        var pageable = org.springframework.data.domain.PageRequest.of(Math.max(page, 1) - 1, Math.min(Math.max(size, 1), 100));
+        var result = userService.findPage(pageable);
+        return new PageResponse<>(result.getContent(), result.getTotalElements(), pageable.getPageNumber() + 1, pageable.getPageSize());
+    }
+
     /** 创建用户。 */
     @PostMapping
+    @RequiresPermission("system:user:write")
     public ApiResponse<UserResponse> create(@RequestHeader(value = "Authorization", required = false) String authorization,
                                             @Valid @RequestBody CreateUserRequest request) {
         authService.requirePermission(authorization, "system:user:write");

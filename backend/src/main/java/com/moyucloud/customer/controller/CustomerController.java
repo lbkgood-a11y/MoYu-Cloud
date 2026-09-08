@@ -3,6 +3,7 @@ package com.moyucloud.customer.controller;
 import java.util.List;
 
 import com.moyucloud.auth.service.AuthService;
+import com.moyucloud.auth.service.RequiresPermission;
 import com.moyucloud.customer.domain.Customer;
 import com.moyucloud.customer.dto.CustomerRequest;
 import com.moyucloud.customer.service.CustomerService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.moyucloud.shared.PageResponse;
 import org.springframework.web.server.ResponseStatusException;
 
 /** 客户管理接口。 */
@@ -42,8 +44,19 @@ public class CustomerController {
         return ApiResponse.success(customerService.findAll(keyword));
     }
 
+    @GetMapping("/page")
+    @RequiresPermission("customer:read")
+    public ApiResponse<PageResponse<Customer>> findPage(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                        @RequestParam(required = false) String keyword,
+                                                        @RequestParam(defaultValue = "1") int page,
+                                                        @RequestParam(defaultValue = "10") int size) {
+        authService.requirePermission(authorization, "customer:read");
+        return ApiResponse.success(customerService.findPage(keyword, page, size));
+    }
+
     /** 新增客户。 */
     @PostMapping
+    @RequiresPermission("customer:write")
     public ApiResponse<Customer> create(@RequestHeader(value = "Authorization", required = false) String authorization,
                            @Valid @RequestBody CustomerRequest request) {
         authService.requirePermission(authorization, "customer:write");
@@ -52,6 +65,7 @@ public class CustomerController {
 
     /** 修改客户。 */
     @PutMapping("/{id}")
+    @RequiresPermission("customer:write")
     public ApiResponse<Customer> update(@RequestHeader(value = "Authorization", required = false) String authorization,
                            @PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
         authService.requirePermission(authorization, "customer:write");
@@ -64,6 +78,7 @@ public class CustomerController {
 
     /** 删除客户。 */
     @DeleteMapping("/{id}")
+    @RequiresPermission("customer:write")
     public ApiResponse<Void> delete(@RequestHeader(value = "Authorization", required = false) String authorization,
                        @PathVariable Long id) {
         authService.requirePermission(authorization, "customer:write");

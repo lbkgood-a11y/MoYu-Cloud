@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'; import { ElMessage } from 'element-plus'; import { api } from '../../api'; import { fetchRoles } from '../../api/system'; import RoleTable from '../../components/RoleTable.vue'; import RoleForm from '../../components/RoleForm.vue'; import RolePermissionDialog from '../../components/RolePermissionDialog.vue'; import CustomerPagination from '../../components/CustomerPagination.vue'; import { useAuthStore } from '../../stores/auth';
+const auth=useAuthStore(); const roles=ref<any[]>([]); const menus=ref<any[]>([]); const page=ref(1); const size=ref(10); const total=ref(0); const form=ref(false); const permission=ref(false); const role=ref<any>(null); const selected=ref<number[]>([]);
+async function load(){try{const r=(await fetchRoles(page.value,size.value)).data.data;roles.value=r.items;total.value=r.total;}catch{ElMessage.error('角色数据加载失败');}}
+async function create(payload:any){try{await api.post('/system/roles',payload);form.value=false;ElMessage.success('角色创建成功');await load();}catch{ElMessage.error('角色创建失败');}}
+async function open(r:any){role.value=r;menus.value=(await api.get('/system/menus')).data.data;selected.value=(await api.get(`/system/roles/${r.id}/menus`)).data.data;permission.value=true;}
+async function save(){if(!role.value)return;try{await api.put(`/system/roles/${role.value.id}/menus`,{menuIds:selected.value});permission.value=false;ElMessage.success('权限保存成功');}catch{ElMessage.error('权限保存失败');}}
+onMounted(async()=>{try{auth.setPermissions((await api.get('/auth/me')).data.data.permissions);}catch{} await load();});
+</script>
+<template><el-card><template #header><div class="header"><span>角色管理</span><el-button v-if="auth.hasPermission('system:user:write')" type="primary" @click="form=true">新增角色</el-button></div></template><RoleTable :roles="roles" :can-write="auth.hasPermission('system:user:write')" @permission="open"/><CustomerPagination :page="page" :size="size" :total="total" @update:page="page=$event;load()" @update:size="size=$event;page=1;load()"/></el-card><RoleForm v-model="form" @save="create"/><RolePermissionDialog v-model="permission" :role="role" :menus="menus" v-model:selected-ids="selected" @save="save"/></template>
+<style scoped>.header{display:flex;justify-content:space-between;align-items:center}</style>

@@ -9,6 +9,9 @@ import com.moyucloud.customer.repository.CustomerRepository;
 import com.moyucloud.audit.service.OperationLogService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.moyucloud.shared.PageResponse;
 
 /** 客户业务服务，负责客户数据的持久化和领域转换。 */
 @Service
@@ -29,6 +32,18 @@ public class CustomerService {
                 ? customerRepository.findAll()
                 : customerRepository.findByNameContaining(keyword);
         return entities.stream().map(this::toDomain).toList();
+    }
+
+    /** 分页查询客户，可按名称、联系人或电话筛选。 */
+    @Transactional(readOnly = true)
+    public PageResponse<Customer> findPage(String keyword, int page, int size) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<CustomerEntity> result = keyword == null || keyword.isBlank()
+                ? customerRepository.findAll(PageRequest.of(safePage - 1, safeSize))
+                : customerRepository.findByNameContainingOrContactContainingOrPhoneContaining(keyword, keyword, keyword,
+                        PageRequest.of(safePage - 1, safeSize));
+        return new PageResponse<>(result.map(this::toDomain).getContent(), result.getTotalElements(), safePage, safeSize);
     }
 
     /** 新增客户。 */

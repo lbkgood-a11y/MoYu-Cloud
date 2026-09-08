@@ -47,7 +47,7 @@ public class AuthService {
         }
         java.util.List<String> permissions = permissionService.findPermissionsByUserId(userId);
         if (permissions.isEmpty() && "admin".equals(user.getRoleCode())) {
-            permissions = java.util.List.of("system:user:read", "system:user:write", "customer:read", "customer:write");
+            permissions = java.util.List.of(PermissionCodes.SYSTEM_USER_READ, PermissionCodes.SYSTEM_USER_WRITE, PermissionCodes.CUSTOMER_READ, PermissionCodes.CUSTOMER_WRITE);
         }
         return new CurrentUserResponse(user.getId(), user.getUsername(), java.util.List.of(user.getRoleCode()), permissions);
     }

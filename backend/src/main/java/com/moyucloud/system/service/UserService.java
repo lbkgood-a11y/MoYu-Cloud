@@ -10,6 +10,8 @@ import com.moyucloud.system.dto.AssignRoleRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /** 用户管理业务服务。 */
 @Service
@@ -23,6 +25,8 @@ public class UserService {
     /** 查询用户列表。 */
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() { return userRepository.findAll().stream().map(this::toResponse).toList(); }
+    @Transactional(readOnly = true)
+    public Page<UserResponse> findPage(Pageable pageable) { return userRepository.findAllByOrderByIdAsc(pageable).map(this::toResponse); }
 
     /** 创建用户并使用 BCrypt 保存密码哈希。 */
     @Transactional
