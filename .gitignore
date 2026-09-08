@@ -17,6 +17,7 @@ build/
 target/
 node_modules/
 __pycache__/
+*.tsbuildinfo
 
 # Logs and local data
 *.log
