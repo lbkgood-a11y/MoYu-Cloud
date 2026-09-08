@@ -21,6 +21,8 @@ const newUser = ref({ username: '', password: '' });
 const userDialogVisible = ref(false);
 const roleDialogVisible = ref(false);
 const newRole = ref({ roleCode: '', roleName: '' });
+const selectedUserId = ref<number | null>(null);
+const selectedRoleCode = ref('');
 const newMenu = ref({ parentId: 0, menuName: '', permission: '', menuType: 'M' });
 const menuDialogVisible = ref(false);
 const menus = ref<Menu[]>([]);
@@ -63,7 +65,7 @@ async function loadCustomers() {
 
 /** 查询用户列表。 */
 async function loadUsers() {
-  try { users.value = (await api.get('/system/users')).data.data; }
+  try { users.value = (await api.get('/system/users')).data.data; await loadRoles(); }
   catch { ElMessage.error('用户数据加载失败'); }
 }
 
@@ -139,6 +141,18 @@ async function toggleUser(user: User) {
   catch { ElMessage.error('用户状态更新失败'); }
 }
 
+/** 为用户分配角色。 */
+async function assignRole(user: User, roleCode: string) {
+  try { await api.put(`/system/users/${user.id}/role`, { roleCode }); ElMessage.success('角色分配成功'); await loadUsers(); }
+  catch { ElMessage.error('角色分配失败'); }
+}
+
+/** 保存用户角色分配面板中的选择。 */
+async function saveSelectedUserRole() {
+  const user = users.value.find(item => item.id === selectedUserId.value);
+  if (user && selectedRoleCode.value) await assignRole(user, selectedRoleCode.value);
+}
+
 /** 打开客户新增或编辑弹窗。 */
 function openCustomerForm(customer?: Customer) {
   editingId.value = customer?.id ?? null;
@@ -194,6 +208,14 @@ onMounted(async () => {
   <el-main v-else class="login-page"><el-card class="login-card"><h2>MoYu-Cloud 控制台</h2><p>让开发少走弯路，让系统快速落座</p>
     <el-form @submit.prevent="login"><el-form-item><el-input v-model="username" placeholder="用户名"/></el-form-item><el-form-item><el-input v-model="password" type="password" placeholder="密码" show-password/></el-form-item><el-button type="primary" native-type="submit" class="full">登录</el-button></el-form>
   </el-card></el-main>
+  <el-card v-if="loggedIn && !menuView && activeView === 'users' && hasPermission('system:user:write')" class="role-assignment-card">
+    <template #header>用户角色分配</template>
+    <el-form inline>
+      <el-form-item label="用户"><el-select v-model="selectedUserId" placeholder="请选择用户" style="width: 180px"><el-option v-for="user in users" :key="user.id" :label="user.username" :value="user.id" /></el-select></el-form-item>
+      <el-form-item label="角色"><el-select v-model="selectedRoleCode" placeholder="请选择角色" style="width: 180px"><el-option v-for="role in roles" :key="role.roleCode" :label="role.roleName" :value="role.roleCode" /></el-select></el-form-item>
+      <el-button type="primary" :disabled="selectedUserId === null || !selectedRoleCode" @click="saveSelectedUserRole">保存角色</el-button>
+    </el-form>
+  </el-card>
 </template>
 
 <style scoped>

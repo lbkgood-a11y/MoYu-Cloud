@@ -5,6 +5,8 @@ import com.moyucloud.system.domain.UserEntity;
 import com.moyucloud.system.dto.CreateUserRequest;
 import com.moyucloud.system.dto.UserResponse;
 import com.moyucloud.system.repository.UserRepository;
+import com.moyucloud.system.repository.RoleRepository;
+import com.moyucloud.system.dto.AssignRoleRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final RoleRepository roleRepository;
 
-    public UserService(UserRepository userRepository) { this.userRepository = userRepository; }
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) { this.userRepository = userRepository; this.roleRepository = roleRepository; }
 
     /** 查询用户列表。 */
     @Transactional(readOnly = true)
@@ -33,6 +36,15 @@ public class UserService {
     public UserResponse setEnabled(Long id, boolean enabled) {
         UserEntity user = userRepository.findById(id).orElseThrow();
         user.setEnabled(enabled);
+        return toResponse(user);
+    }
+
+    /** 为用户分配已存在的角色。 */
+    @Transactional
+    public UserResponse assignRole(Long id, AssignRoleRequest request) {
+        roleRepository.findByRoleCode(request.roleCode()).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        UserEntity user = userRepository.findById(id).orElseThrow();
+        user.setRoleCode(request.roleCode());
         return toResponse(user);
     }
 

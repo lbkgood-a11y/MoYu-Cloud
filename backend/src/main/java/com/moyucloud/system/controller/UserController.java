@@ -5,6 +5,7 @@ import com.moyucloud.auth.service.AuthService;
 import com.moyucloud.shared.ApiResponse;
 import com.moyucloud.system.dto.CreateUserRequest;
 import com.moyucloud.system.dto.UserResponse;
+import com.moyucloud.system.dto.AssignRoleRequest;
 import com.moyucloud.system.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,13 @@ public class UserController {
                                                 @PathVariable Long id, @RequestParam boolean enabled) {
         authService.requirePermission(authorization, "system:user:write");
         return ApiResponse.success(userService.setEnabled(id, enabled));
+    }
+
+    /** 为用户分配角色。 */
+    @PutMapping("/{id}/role")
+    public ApiResponse<UserResponse> assignRole(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                @PathVariable Long id, @Valid @RequestBody AssignRoleRequest request) {
+        authService.requirePermission(authorization, "system:user:write");
+        return ApiResponse.success(userService.assignRole(id, request));
     }
 }

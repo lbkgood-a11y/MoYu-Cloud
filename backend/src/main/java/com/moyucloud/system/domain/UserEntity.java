@@ -31,6 +31,8 @@ public class UserEntity {
     public String getPasswordHash() { return passwordHash; }
     public boolean isEnabled() { return enabled; }
     public String getRoleCode() { return roleCode; }
+    /** 修改用户角色编码。 */
+    public void setRoleCode(String roleCode) { this.roleCode = roleCode; }
     /** 修改用户启用状态。 */
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }
