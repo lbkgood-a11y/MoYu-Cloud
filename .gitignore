@@ -1,0 +1,25 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code local settings
+.claude/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+target/
+node_modules/
+__pycache__/
+
+# Logs and local data
+*.log
+*.sqlite
+*.db
+

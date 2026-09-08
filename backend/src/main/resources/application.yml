@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: moyu-cloud-backend
+  datasource:
+    url: ${MOYU_DB_URL:jdbc:mysql://localhost:3306/moyu_cloud?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${MOYU_DB_USERNAME:root}
+    password: ${MOYU_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+moyu:
+  jwt:
+    secret: ${MOYU_JWT_SECRET:change-me-in-production-change-me-32bytes}
+  admin:
+    username: ${MOYU_ADMIN_USERNAME:}
+    password: ${MOYU_ADMIN_PASSWORD:}
+server:
+  port: ${SERVER_PORT:8080}
