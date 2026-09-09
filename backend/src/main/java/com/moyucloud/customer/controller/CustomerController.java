@@ -169,6 +169,13 @@ public class CustomerController {
         }
         return ApiResponse.success(null);
     }
+    @PostMapping("/batch-delete")
+    @RequiresPermission(PermissionCodes.CUSTOMER_WRITE)
+    public ApiResponse<Void> batchDelete(@RequestHeader(value="Authorization",required=false) String authorization,@RequestBody List<String> ids){
+        var user=authService.currentUser(authorization); if(ids==null||ids.isEmpty()) return ApiResponse.success(null);
+        for(String id:ids) if(!customerService.canAccess(id,user.departmentId(),"admin".equals(user.username()))) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"无权访问其他部门客户");
+        ids.forEach(id->customerService.delete(user.username(),id)); return ApiResponse.success(null);
+    }
 
     @GetMapping(value = "/export", produces = "text/csv")
     public String export(

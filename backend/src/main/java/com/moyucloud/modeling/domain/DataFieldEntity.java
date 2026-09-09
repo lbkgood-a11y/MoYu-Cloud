@@ -67,4 +67,5 @@ public class DataFieldEntity {
     public String getDictionaryCode() {
         return dictionaryCode;
     }
+    public void setDictionaryCode(String code) { this.dictionaryCode = code; }
 }

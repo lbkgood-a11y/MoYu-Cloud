@@ -12,5 +12,5 @@ public record DataTableRequest(
             @NotBlank String fieldCode,
             @NotBlank String fieldType,
             boolean required,
-            int sortOrder) {}
+            int sortOrder, String dictionaryCode) { public DataFieldRequest(String c,String t,boolean r,int s){this(c,t,r,s,null);} }
 }

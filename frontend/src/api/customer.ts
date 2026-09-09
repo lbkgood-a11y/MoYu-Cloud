@@ -30,6 +30,7 @@ export function updateCustomer(id: string, payload: Omit<Customer, 'id'>) {
 export function deleteCustomer(id: string) {
   return api.delete(`/customers/${id}`);
 }
+export function batchDeleteCustomers(ids: string[]) { return api.post('/customers/batch-delete', ids); }
 export function fetchCustomerDetail(id: string) { return api.get(`/customers/${id}`); }
 export function exportCustomers() {
   return api.get('/customers/export', { responseType: 'blob' });
