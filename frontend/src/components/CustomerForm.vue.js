@@ -1,10 +1,20 @@
-import { reactive, watch } from 'vue';
+import { reactive, watch, onMounted, ref } from 'vue';
+import { fetchDictionary } from '../api/dictionary';
 import { ElMessage } from 'element-plus';
 const props = defineProps();
 const emit = defineEmits();
 const form = reactive({ name: '', contact: '', phone: '', status: 'ACTIVE' });
+const statusOptions = ref([]);
+onMounted(async () => { try {
+    statusOptions.value = (await fetchDictionary('customer_status')).data.data.items.filter((x) => x.enabled);
+}
+catch {
+    statusOptions.value = [{ itemValue: 'ACTIVE', itemLabel: '有效' }, { itemValue: 'INACTIVE', itemLabel: '停用' }];
+} });
 watch(() => props.customer, (customer) => {
-    Object.assign(form, customer ? { name: customer.name, contact: customer.contact, phone: customer.phone, status: customer.status } : { name: '', contact: '', phone: '', status: 'ACTIVE' });
+    Object.assign(form, customer
+        ? { name: customer.name, contact: customer.contact, phone: customer.phone, status: customer.status }
+        : { name: '', contact: '', phone: '', status: 'ACTIVE' });
 }, { immediate: true });
 function submit() {
     if (!form.name.trim()) {
@@ -138,71 +148,64 @@ const __VLS_43 = __VLS_42({
     ...{ style: {} },
 }, ...__VLS_functionalComponentArgsRest(__VLS_42));
 __VLS_44.slots.default;
-const __VLS_45 = {}.ElOption;
-/** @type {[typeof __VLS_components.ElOption, typeof __VLS_components.elOption, ]} */ ;
-// @ts-ignore
-const __VLS_46 = __VLS_asFunctionalComponent(__VLS_45, new __VLS_45({
-    label: "有效",
-    value: "ACTIVE",
-}));
-const __VLS_47 = __VLS_46({
-    label: "有效",
-    value: "ACTIVE",
-}, ...__VLS_functionalComponentArgsRest(__VLS_46));
-const __VLS_49 = {}.ElOption;
-/** @type {[typeof __VLS_components.ElOption, typeof __VLS_components.elOption, ]} */ ;
-// @ts-ignore
-const __VLS_50 = __VLS_asFunctionalComponent(__VLS_49, new __VLS_49({
-    label: "停用",
-    value: "INACTIVE",
-}));
-const __VLS_51 = __VLS_50({
-    label: "停用",
-    value: "INACTIVE",
-}, ...__VLS_functionalComponentArgsRest(__VLS_50));
+for (const [o] of __VLS_getVForSourceType((__VLS_ctx.statusOptions))) {
+    const __VLS_45 = {}.ElOption;
+    /** @type {[typeof __VLS_components.ElOption, typeof __VLS_components.elOption, ]} */ ;
+    // @ts-ignore
+    const __VLS_46 = __VLS_asFunctionalComponent(__VLS_45, new __VLS_45({
+        key: (o.itemValue),
+        label: (o.itemLabel),
+        value: (o.itemValue),
+    }));
+    const __VLS_47 = __VLS_46({
+        key: (o.itemValue),
+        label: (o.itemLabel),
+        value: (o.itemValue),
+    }, ...__VLS_functionalComponentArgsRest(__VLS_46));
+}
 var __VLS_44;
 var __VLS_40;
 var __VLS_12;
 {
     const { footer: __VLS_thisSlot } = __VLS_3.slots;
-    const __VLS_53 = {}.ElButton;
+    const __VLS_49 = {}.ElButton;
     /** @type {[typeof __VLS_components.ElButton, typeof __VLS_components.elButton, typeof __VLS_components.ElButton, typeof __VLS_components.elButton, ]} */ ;
     // @ts-ignore
-    const __VLS_54 = __VLS_asFunctionalComponent(__VLS_53, new __VLS_53({
+    const __VLS_50 = __VLS_asFunctionalComponent(__VLS_49, new __VLS_49({
         ...{ 'onClick': {} },
     }));
-    const __VLS_55 = __VLS_54({
+    const __VLS_51 = __VLS_50({
         ...{ 'onClick': {} },
-    }, ...__VLS_functionalComponentArgsRest(__VLS_54));
-    let __VLS_57;
-    let __VLS_58;
-    let __VLS_59;
-    const __VLS_60 = {
+    }, ...__VLS_functionalComponentArgsRest(__VLS_50));
+    let __VLS_53;
+    let __VLS_54;
+    let __VLS_55;
+    const __VLS_56 = {
         onClick: (...[$event]) => {
             __VLS_ctx.emit('update:modelValue', false);
         }
     };
-    __VLS_56.slots.default;
-    var __VLS_56;
-    const __VLS_61 = {}.ElButton;
+    __VLS_52.slots.default;
+    var __VLS_52;
+    const __VLS_57 = {}.ElButton;
     /** @type {[typeof __VLS_components.ElButton, typeof __VLS_components.elButton, typeof __VLS_components.ElButton, typeof __VLS_components.elButton, ]} */ ;
     // @ts-ignore
-    const __VLS_62 = __VLS_asFunctionalComponent(__VLS_61, new __VLS_61({
+    const __VLS_58 = __VLS_asFunctionalComponent(__VLS_57, new __VLS_57({
         ...{ 'onClick': {} },
         type: "primary",
     }));
-    const __VLS_63 = __VLS_62({
+    const __VLS_59 = __VLS_58({
         ...{ 'onClick': {} },
         type: "primary",
-    }, ...__VLS_functionalComponentArgsRest(__VLS_62));
-    let __VLS_65;
-    let __VLS_66;
-    let __VLS_67;
-    const __VLS_68 = {
+    }, ...__VLS_functionalComponentArgsRest(__VLS_58));
+    let __VLS_61;
+    let __VLS_62;
+    let __VLS_63;
+    const __VLS_64 = {
         onClick: (__VLS_ctx.submit)
     };
-    __VLS_64.slots.default;
-    var __VLS_64;
+    __VLS_60.slots.default;
+    var __VLS_60;
 }
 var __VLS_3;
 var __VLS_dollars;
@@ -211,6 +214,7 @@ const __VLS_self = (await import('vue')).defineComponent({
         return {
             emit: emit,
             form: form,
+            statusOptions: statusOptions,
             submit: submit,
         };
     },

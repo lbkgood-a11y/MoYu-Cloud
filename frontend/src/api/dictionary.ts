@@ -1,0 +1,10 @@
+import { api } from '../api';
+export const fetchDictionary = (code: string) => api.get(`/dictionaries/${code}`);
+export const fetchDictionaries = () => api.get('/dictionaries');
+export const createDictionary = (data: any) => api.post('/dictionaries', data);
+export const addDictionaryItem = (code: string, data: any) => api.post(`/dictionaries/${code}/items`, data);
+export const updateDictionaryItem = (id: string, data: any) => api.put(`/dictionaries/items/${id}`, data);
+export const deleteDictionaryItem = (id: string) => api.delete(`/dictionaries/items/${id}`);
+export const updateDictionary = (code: string, data: any) => api.put(`/dictionaries/${code}`, data);
+export const toggleDictionary = (code: string, value: boolean) => api.put(`/dictionaries/${code}/enabled`, null, { params: { value } });
+export const toggleDictionaryItem = (id: string, value: boolean) => api.put(`/dictionaries/items/${id}/enabled`, null, { params: { value } });

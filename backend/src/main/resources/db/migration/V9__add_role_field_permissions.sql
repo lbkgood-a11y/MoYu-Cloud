@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS sys_role_field_permission (id CHAR(26) PRIMARY KEY, role_id CHAR(26) NOT NULL, resource_code VARCHAR(80) NOT NULL, field_code VARCHAR(80) NOT NULL, readable BOOLEAN NOT NULL DEFAULT FALSE, writable BOOLEAN NOT NULL DEFAULT FALSE, mask_strategy VARCHAR(30) NOT NULL DEFAULT 'NONE', UNIQUE KEY uk_role_field (role_id,resource_code,field_code));

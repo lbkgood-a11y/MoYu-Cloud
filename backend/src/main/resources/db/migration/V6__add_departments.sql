@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS sys_department (id CHAR(26) PRIMARY KEY, name VARCHAR(100) NOT NULL, parent_id CHAR(26) NULL, enabled BOOLEAN NOT NULL DEFAULT TRUE, sort_order INT NOT NULL DEFAULT 0, CONSTRAINT fk_department_parent FOREIGN KEY (parent_id) REFERENCES sys_department(id));

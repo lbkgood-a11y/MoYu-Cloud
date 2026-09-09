@@ -14,7 +14,10 @@ export const useAuthStore = defineStore('auth', () => {
         if (user)
             localStorage.setItem('moyu_username', user);
     }
-    function setPermissions(nextPermissions) { permissions.value = nextPermissions || []; localStorage.setItem('moyu_permissions', JSON.stringify(permissions.value)); }
+    function setPermissions(nextPermissions) {
+        permissions.value = nextPermissions || [];
+        localStorage.setItem('moyu_permissions', JSON.stringify(permissions.value));
+    }
     function clearSession() {
         token.value = null;
         permissions.value = [];
@@ -23,6 +26,8 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.removeItem('moyu_username');
         username.value = '';
     }
-    function hasPermission(permission) { return permissions.value.includes(permission); }
+    function hasPermission(permission) {
+        return permissions.value.includes(permission);
+    }
     return { token, permissions, username, loggedIn, setSession, setPermissions, clearSession, hasPermission };
 });

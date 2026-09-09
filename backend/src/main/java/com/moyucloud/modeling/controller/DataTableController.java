@@ -1,0 +1,62 @@
+package com.moyucloud.modeling.controller;
+
+import com.moyucloud.auth.service.*;
+import com.moyucloud.modeling.domain.*;
+import com.moyucloud.modeling.dto.*;
+import com.moyucloud.modeling.repository.DataTableRepository;
+import com.moyucloud.modeling.service.CrudCodeGeneratorService;
+import com.moyucloud.shared.ApiResponse;
+import jakarta.validation.Valid;
+import java.util.*;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/modeling/tables")
+public class DataTableController {
+    private final DataTableRepository repo;
+    private final AuthService auth;
+    private final CrudCodeGeneratorService generator;
+
+    public DataTableController(DataTableRepository r, AuthService a, CrudCodeGeneratorService g) {
+        repo = r;
+        auth = a;
+        generator = g;
+    }
+
+    @PostMapping("/{id}/validate") 
+    public ApiResponse<Boolean> validate(@RequestHeader(value="Authorization",required=false)String a,@PathVariable String id){
+        auth.requirePermission(a,PermissionCodes.SYSTEM_USER_WRITE);
+        return ApiResponse.success(generator.validate(generator.generate(repo.findById(id).orElseThrow())));
+    }
+
+    @GetMapping
+    @RequiresPermission(PermissionCodes.SYSTEM_USER_READ)
+    public ApiResponse<List<DataTableEntity>> list(
+            @RequestHeader(value = "Authorization", required = false) String a) {
+        auth.requirePermission(a, PermissionCodes.SYSTEM_USER_READ);
+        return ApiResponse.success(repo.findAll());
+    }
+
+    @PostMapping
+    @RequiresPermission(PermissionCodes.SYSTEM_USER_WRITE)
+    public ApiResponse<DataTableEntity> create(
+            @RequestHeader(value = "Authorization", required = false) String a,
+            @Valid @RequestBody DataTableRequest r) {
+        auth.requirePermission(a, PermissionCodes.SYSTEM_USER_WRITE);
+        if (repo.existsByTableCode(r.tableCode())) throw new IllegalArgumentException("表编码已存在");
+        var t = new DataTableEntity(r.tableCode(), r.tableName());
+        for (var f : r.fields())
+            t.addField(
+                    new DataFieldEntity(f.fieldCode(), f.fieldType(), f.required(), f.sortOrder()));
+        return ApiResponse.success(repo.save(t));
+    }
+
+    @PostMapping("/{code}/generate")
+    @RequiresPermission(PermissionCodes.SYSTEM_USER_WRITE)
+    public ApiResponse<GeneratedModule> generate(
+            @RequestHeader(value = "Authorization", required = false) String a,
+            @PathVariable String code) {
+        auth.requirePermission(a, PermissionCodes.SYSTEM_USER_WRITE);
+        return ApiResponse.success(generator.generate(repo.findById(code).orElseThrow()));
+    }
+}

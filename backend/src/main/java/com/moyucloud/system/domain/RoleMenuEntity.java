@@ -8,9 +8,15 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "sys_role_menu")
 public class RoleMenuEntity {
-    @EmbeddedId
-    private RoleMenuId id;
-    protected RoleMenuEntity() { }
-    public RoleMenuEntity(Long roleId, Long menuId) { this.id = new RoleMenuId(roleId, menuId); }
-    public RoleMenuId getId() { return id; }
+    @EmbeddedId private RoleMenuId id;
+
+    protected RoleMenuEntity() {}
+
+    public RoleMenuEntity(String roleId, String menuId) {
+        this.id = new RoleMenuId(roleId, menuId);
+    }
+
+    public RoleMenuId getId() {
+        return id;
+    }
 }

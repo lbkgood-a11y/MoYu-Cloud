@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { api } from '../../api';
 import MenuForm from '../../components/MenuForm.vue';
@@ -7,45 +7,75 @@ const auth = useAuthStore();
 const menus = ref([]);
 const dialog = ref(false);
 const editing = ref(null);
-async function load() { try {
-    menus.value = (await api.get('/system/menus')).data.data;
+/** 将菜单平面数据组装为树形数据。 */
+const menuTree = computed(() => {
+    const nodes = menus.value.map((menu) => ({ ...menu, children: [] }));
+    const roots = [];
+    nodes.forEach((node) => {
+        const parent = nodes.find((item) => item.id === node.parentId);
+        if (parent)
+            parent.children.push(node);
+        else
+            roots.push(node);
+    });
+    return roots;
+});
+async function load() {
+    try {
+        menus.value = (await api.get('/system/menus')).data.data;
+    }
+    catch {
+        ElMessage.error('菜单加载失败');
+    }
 }
-catch {
-    ElMessage.error('菜单加载失败');
-} }
-function openCreate() { editing.value = null; dialog.value = true; }
-function openEdit(row) { editing.value = row; dialog.value = true; }
-async function save(payload) { try {
-    if (editing.value)
-        await api.put(`/system/menus/${editing.value.id}`, payload);
-    else
-        await api.post('/system/menus', payload);
-    dialog.value = false;
-    ElMessage.success('保存成功');
+function openCreate() {
+    editing.value = null;
+    dialog.value = true;
+}
+function openEdit(row) {
+    editing.value = row;
+    dialog.value = true;
+}
+async function save(payload) {
+    try {
+        if (editing.value)
+            await api.put(`/system/menus/${editing.value.id}`, payload);
+        else
+            await api.post('/system/menus', payload);
+        dialog.value = false;
+        ElMessage.success('保存成功');
+        await load();
+    }
+    catch {
+        ElMessage.error('保存失败');
+    }
+}
+async function remove(row) {
+    try {
+        await api.delete(`/system/menus/${row.id}`);
+        ElMessage.success('删除成功');
+        await load();
+    }
+    catch {
+        ElMessage.error('删除失败');
+    }
+}
+async function toggle(row) {
+    try {
+        await api.put(`/system/menus/${row.id}/enabled`, null, { params: { enabled: !row.enabled } });
+        await load();
+    }
+    catch {
+        ElMessage.error('状态更新失败');
+    }
+}
+onMounted(async () => {
+    try {
+        auth.setPermissions((await api.get('/auth/me')).data.data.permissions);
+    }
+    catch { }
     await load();
-}
-catch {
-    ElMessage.error('保存失败');
-} }
-async function remove(row) { try {
-    await api.delete(`/system/menus/${row.id}`);
-    ElMessage.success('删除成功');
-    await load();
-}
-catch {
-    ElMessage.error('删除失败');
-} }
-async function toggle(row) { try {
-    await api.put(`/system/menus/${row.id}/enabled`, null, { params: { enabled: !row.enabled } });
-    await load();
-}
-catch {
-    ElMessage.error('状态更新失败');
-} }
-onMounted(async () => { try {
-    auth.setPermissions((await api.get('/auth/me')).data.data.permissions);
-}
-catch { } await load(); });
+});
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
 let __VLS_components;
@@ -86,208 +116,226 @@ __VLS_3.slots.default;
         var __VLS_7;
     }
 }
-const __VLS_12 = {}.ElTable;
-/** @type {[typeof __VLS_components.ElTable, typeof __VLS_components.elTable, typeof __VLS_components.ElTable, typeof __VLS_components.elTable, ]} */ ;
+const __VLS_12 = {}.ElTree;
+/** @type {[typeof __VLS_components.ElTree, typeof __VLS_components.elTree, ]} */ ;
 // @ts-ignore
 const __VLS_13 = __VLS_asFunctionalComponent(__VLS_12, new __VLS_12({
-    data: (__VLS_ctx.menus),
-    stripe: true,
+    ...{ class: "menu-tree" },
+    nodeKey: "id",
+    defaultExpandAll: true,
+    data: (__VLS_ctx.menuTree),
+    props: ({ label: 'menuName', children: 'children' }),
 }));
 const __VLS_14 = __VLS_13({
-    data: (__VLS_ctx.menus),
-    stripe: true,
+    ...{ class: "menu-tree" },
+    nodeKey: "id",
+    defaultExpandAll: true,
+    data: (__VLS_ctx.menuTree),
+    props: ({ label: 'menuName', children: 'children' }),
 }, ...__VLS_functionalComponentArgsRest(__VLS_13));
-__VLS_15.slots.default;
-const __VLS_16 = {}.ElTableColumn;
-/** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
+const __VLS_16 = {}.ElTable;
+/** @type {[typeof __VLS_components.ElTable, typeof __VLS_components.elTable, typeof __VLS_components.ElTable, typeof __VLS_components.elTable, ]} */ ;
 // @ts-ignore
 const __VLS_17 = __VLS_asFunctionalComponent(__VLS_16, new __VLS_16({
-    prop: "id",
-    label: "编号",
-    width: "90",
+    data: (__VLS_ctx.menus),
+    stripe: true,
 }));
 const __VLS_18 = __VLS_17({
-    prop: "id",
-    label: "编号",
-    width: "90",
+    data: (__VLS_ctx.menus),
+    stripe: true,
 }, ...__VLS_functionalComponentArgsRest(__VLS_17));
+__VLS_19.slots.default;
 const __VLS_20 = {}.ElTableColumn;
 /** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
 // @ts-ignore
 const __VLS_21 = __VLS_asFunctionalComponent(__VLS_20, new __VLS_20({
-    prop: "menuName",
-    label: "菜单名称",
+    prop: "id",
+    label: "编号",
+    width: "90",
 }));
 const __VLS_22 = __VLS_21({
-    prop: "menuName",
-    label: "菜单名称",
+    prop: "id",
+    label: "编号",
+    width: "90",
 }, ...__VLS_functionalComponentArgsRest(__VLS_21));
 const __VLS_24 = {}.ElTableColumn;
 /** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
 // @ts-ignore
 const __VLS_25 = __VLS_asFunctionalComponent(__VLS_24, new __VLS_24({
-    prop: "permission",
-    label: "权限标识",
+    prop: "menuName",
+    label: "菜单名称",
 }));
 const __VLS_26 = __VLS_25({
-    prop: "permission",
-    label: "权限标识",
+    prop: "menuName",
+    label: "菜单名称",
 }, ...__VLS_functionalComponentArgsRest(__VLS_25));
 const __VLS_28 = {}.ElTableColumn;
 /** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
 // @ts-ignore
 const __VLS_29 = __VLS_asFunctionalComponent(__VLS_28, new __VLS_28({
-    prop: "menuType",
-    label: "类型",
-    width: "90",
+    prop: "permission",
+    label: "权限标识",
 }));
 const __VLS_30 = __VLS_29({
+    prop: "permission",
+    label: "权限标识",
+}, ...__VLS_functionalComponentArgsRest(__VLS_29));
+const __VLS_32 = {}.ElTableColumn;
+/** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
+// @ts-ignore
+const __VLS_33 = __VLS_asFunctionalComponent(__VLS_32, new __VLS_32({
     prop: "menuType",
     label: "类型",
     width: "90",
-}, ...__VLS_functionalComponentArgsRest(__VLS_29));
-const __VLS_32 = {}.ElTableColumn;
-/** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
-// @ts-ignore
-const __VLS_33 = __VLS_asFunctionalComponent(__VLS_32, new __VLS_32({
-    label: "状态",
 }));
 const __VLS_34 = __VLS_33({
-    label: "状态",
+    prop: "menuType",
+    label: "类型",
+    width: "90",
 }, ...__VLS_functionalComponentArgsRest(__VLS_33));
-__VLS_35.slots.default;
+const __VLS_36 = {}.ElTableColumn;
+/** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
+// @ts-ignore
+const __VLS_37 = __VLS_asFunctionalComponent(__VLS_36, new __VLS_36({
+    label: "状态",
+}));
+const __VLS_38 = __VLS_37({
+    label: "状态",
+}, ...__VLS_functionalComponentArgsRest(__VLS_37));
+__VLS_39.slots.default;
 {
-    const { default: __VLS_thisSlot } = __VLS_35.slots;
+    const { default: __VLS_thisSlot } = __VLS_39.slots;
     const [s] = __VLS_getSlotParams(__VLS_thisSlot);
-    const __VLS_36 = {}.ElTag;
+    const __VLS_40 = {}.ElTag;
     /** @type {[typeof __VLS_components.ElTag, typeof __VLS_components.elTag, typeof __VLS_components.ElTag, typeof __VLS_components.elTag, ]} */ ;
     // @ts-ignore
-    const __VLS_37 = __VLS_asFunctionalComponent(__VLS_36, new __VLS_36({
-        type: (s.row.enabled ? 'success' : 'info'),
-    }));
-    const __VLS_38 = __VLS_37({
-        type: (s.row.enabled ? 'success' : 'info'),
-    }, ...__VLS_functionalComponentArgsRest(__VLS_37));
-    __VLS_39.slots.default;
-    (s.row.enabled ? '启用' : '禁用');
-    var __VLS_39;
-}
-var __VLS_35;
-if (__VLS_ctx.auth.hasPermission('system:user:write')) {
-    const __VLS_40 = {}.ElTableColumn;
-    /** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
-    // @ts-ignore
     const __VLS_41 = __VLS_asFunctionalComponent(__VLS_40, new __VLS_40({
-        label: "操作",
-        width: "220",
+        type: (s.row.enabled ? 'success' : 'info'),
     }));
     const __VLS_42 = __VLS_41({
-        label: "操作",
-        width: "220",
+        type: (s.row.enabled ? 'success' : 'info'),
     }, ...__VLS_functionalComponentArgsRest(__VLS_41));
     __VLS_43.slots.default;
+    (s.row.enabled ? '启用' : '禁用');
+    var __VLS_43;
+}
+var __VLS_39;
+if (__VLS_ctx.auth.hasPermission('system:user:write')) {
+    const __VLS_44 = {}.ElTableColumn;
+    /** @type {[typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, typeof __VLS_components.ElTableColumn, typeof __VLS_components.elTableColumn, ]} */ ;
+    // @ts-ignore
+    const __VLS_45 = __VLS_asFunctionalComponent(__VLS_44, new __VLS_44({
+        label: "操作",
+        width: "220",
+    }));
+    const __VLS_46 = __VLS_45({
+        label: "操作",
+        width: "220",
+    }, ...__VLS_functionalComponentArgsRest(__VLS_45));
+    __VLS_47.slots.default;
     {
-        const { default: __VLS_thisSlot } = __VLS_43.slots;
+        const { default: __VLS_thisSlot } = __VLS_47.slots;
         const [s] = __VLS_getSlotParams(__VLS_thisSlot);
-        const __VLS_44 = {}.ElButton;
+        const __VLS_48 = {}.ElButton;
         /** @type {[typeof __VLS_components.ElButton, typeof __VLS_components.elButton, typeof __VLS_components.ElButton, typeof __VLS_components.elButton, ]} */ ;
         // @ts-ignore
-        const __VLS_45 = __VLS_asFunctionalComponent(__VLS_44, new __VLS_44({
+        const __VLS_49 = __VLS_asFunctionalComponent(__VLS_48, new __VLS_48({
             ...{ 'onClick': {} },
             link: true,
             type: "primary",
         }));
-        const __VLS_46 = __VLS_45({
+        const __VLS_50 = __VLS_49({
             ...{ 'onClick': {} },
             link: true,
             type: "primary",
-        }, ...__VLS_functionalComponentArgsRest(__VLS_45));
-        let __VLS_48;
-        let __VLS_49;
-        let __VLS_50;
-        const __VLS_51 = {
+        }, ...__VLS_functionalComponentArgsRest(__VLS_49));
+        let __VLS_52;
+        let __VLS_53;
+        let __VLS_54;
+        const __VLS_55 = {
             onClick: (...[$event]) => {
                 if (!(__VLS_ctx.auth.hasPermission('system:user:write')))
                     return;
                 __VLS_ctx.openEdit(s.row);
             }
         };
-        __VLS_47.slots.default;
-        var __VLS_47;
-        const __VLS_52 = {}.ElButton;
+        __VLS_51.slots.default;
+        var __VLS_51;
+        const __VLS_56 = {}.ElButton;
         /** @type {[typeof __VLS_components.ElButton, typeof __VLS_components.elButton, typeof __VLS_components.ElButton, typeof __VLS_components.elButton, ]} */ ;
         // @ts-ignore
-        const __VLS_53 = __VLS_asFunctionalComponent(__VLS_52, new __VLS_52({
+        const __VLS_57 = __VLS_asFunctionalComponent(__VLS_56, new __VLS_56({
             ...{ 'onClick': {} },
             link: true,
         }));
-        const __VLS_54 = __VLS_53({
+        const __VLS_58 = __VLS_57({
             ...{ 'onClick': {} },
             link: true,
-        }, ...__VLS_functionalComponentArgsRest(__VLS_53));
-        let __VLS_56;
-        let __VLS_57;
-        let __VLS_58;
-        const __VLS_59 = {
+        }, ...__VLS_functionalComponentArgsRest(__VLS_57));
+        let __VLS_60;
+        let __VLS_61;
+        let __VLS_62;
+        const __VLS_63 = {
             onClick: (...[$event]) => {
                 if (!(__VLS_ctx.auth.hasPermission('system:user:write')))
                     return;
                 __VLS_ctx.toggle(s.row);
             }
         };
-        __VLS_55.slots.default;
+        __VLS_59.slots.default;
         (s.row.enabled ? '禁用' : '启用');
-        var __VLS_55;
-        const __VLS_60 = {}.ElButton;
+        var __VLS_59;
+        const __VLS_64 = {}.ElButton;
         /** @type {[typeof __VLS_components.ElButton, typeof __VLS_components.elButton, typeof __VLS_components.ElButton, typeof __VLS_components.elButton, ]} */ ;
         // @ts-ignore
-        const __VLS_61 = __VLS_asFunctionalComponent(__VLS_60, new __VLS_60({
+        const __VLS_65 = __VLS_asFunctionalComponent(__VLS_64, new __VLS_64({
             ...{ 'onClick': {} },
             link: true,
             type: "danger",
         }));
-        const __VLS_62 = __VLS_61({
+        const __VLS_66 = __VLS_65({
             ...{ 'onClick': {} },
             link: true,
             type: "danger",
-        }, ...__VLS_functionalComponentArgsRest(__VLS_61));
-        let __VLS_64;
-        let __VLS_65;
-        let __VLS_66;
-        const __VLS_67 = {
+        }, ...__VLS_functionalComponentArgsRest(__VLS_65));
+        let __VLS_68;
+        let __VLS_69;
+        let __VLS_70;
+        const __VLS_71 = {
             onClick: (...[$event]) => {
                 if (!(__VLS_ctx.auth.hasPermission('system:user:write')))
                     return;
                 __VLS_ctx.remove(s.row);
             }
         };
-        __VLS_63.slots.default;
-        var __VLS_63;
+        __VLS_67.slots.default;
+        var __VLS_67;
     }
-    var __VLS_43;
+    var __VLS_47;
 }
-var __VLS_15;
+var __VLS_19;
 var __VLS_3;
 /** @type {[typeof MenuForm, ]} */ ;
 // @ts-ignore
-const __VLS_68 = __VLS_asFunctionalComponent(MenuForm, new MenuForm({
+const __VLS_72 = __VLS_asFunctionalComponent(MenuForm, new MenuForm({
     ...{ 'onSave': {} },
     modelValue: (__VLS_ctx.dialog),
     menu: (__VLS_ctx.editing),
 }));
-const __VLS_69 = __VLS_68({
+const __VLS_73 = __VLS_72({
     ...{ 'onSave': {} },
     modelValue: (__VLS_ctx.dialog),
     menu: (__VLS_ctx.editing),
-}, ...__VLS_functionalComponentArgsRest(__VLS_68));
-let __VLS_71;
-let __VLS_72;
-let __VLS_73;
-const __VLS_74 = {
+}, ...__VLS_functionalComponentArgsRest(__VLS_72));
+let __VLS_75;
+let __VLS_76;
+let __VLS_77;
+const __VLS_78 = {
     onSave: (__VLS_ctx.save)
 };
-var __VLS_70;
+var __VLS_74;
 /** @type {__VLS_StyleScopedClasses['header']} */ ;
+/** @type {__VLS_StyleScopedClasses['menu-tree']} */ ;
 var __VLS_dollars;
 const __VLS_self = (await import('vue')).defineComponent({
     setup() {
@@ -297,6 +345,7 @@ const __VLS_self = (await import('vue')).defineComponent({
             menus: menus,
             dialog: dialog,
             editing: editing,
+            menuTree: menuTree,
             openCreate: openCreate,
             openEdit: openEdit,
             save: save,

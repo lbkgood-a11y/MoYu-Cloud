@@ -7,14 +7,16 @@ const logs = ref([]);
 const page = ref(1);
 const size = ref(10);
 const total = ref(0);
-async function load() { try {
-    const r = (await fetchOperationLogs(page.value, size.value)).data.data;
-    logs.value = r.items;
-    total.value = r.total;
+async function load() {
+    try {
+        const r = (await fetchOperationLogs(page.value, size.value)).data.data;
+        logs.value = r.items;
+        total.value = r.total;
+    }
+    catch {
+        ElMessage.error('操作日志加载失败');
+    }
 }
-catch {
-    ElMessage.error('操作日志加载失败');
-} }
 onMounted(load);
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
@@ -61,6 +63,7 @@ const __VLS_14 = {
     'onUpdate:page': (...[$event]) => {
         __VLS_ctx.page = $event;
         __VLS_ctx.load();
+        ;
     }
 };
 const __VLS_15 = {
@@ -68,6 +71,7 @@ const __VLS_15 = {
         __VLS_ctx.size = $event;
         __VLS_ctx.page = 1;
         __VLS_ctx.load();
+        ;
     }
 };
 var __VLS_10;

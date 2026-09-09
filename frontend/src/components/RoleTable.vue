@@ -1,14 +1,7 @@
 <script setup lang="ts">
-interface Role { id: number; roleCode: string; roleName: string; enabled: boolean }
-defineProps<{ roles: Role[]; canWrite: boolean }>();
-const emit = defineEmits<{ (event: 'permission', role: Role): void }>();
+import CrudTable from './crud/CrudTable.vue';
+const props=defineProps<{roles:any[];canWrite:boolean}>();
+const emit=defineEmits<{(e:'permission',r:any):void;(e:'field-permission',r:any):void;(e:'edit',r:any):void;(e:'remove',r:any):void;(e:'toggle',r:any):void}>();
+const fields=[{code:'roleCode',label:'角色编码',type:'text',table:true},{code:'roleName',label:'角色名称',type:'text',table:true},{code:'enabled',label:'状态',type:'switch',table:true}];
 </script>
-<template>
-  <el-table :data="roles" stripe>
-    <el-table-column prop="id" label="编号" width="90" />
-    <el-table-column prop="roleCode" label="角色编码" />
-    <el-table-column prop="roleName" label="角色名称" />
-    <el-table-column label="状态"><template #default="scope"><el-tag :type="scope.row.enabled ? 'success' : 'info'">{{ scope.row.enabled ? '启用' : '禁用' }}</el-tag></template></el-table-column>
-    <el-table-column label="操作" width="120"><template #default="scope"><el-button v-if="canWrite" link type="primary" @click="emit('permission', scope.row)">菜单授权</el-button></template></el-table-column>
-  </el-table>
-</template>
+<template><CrudTable :fields="fields" :rows="props.roles" :can-write="canWrite"><template #actions="{row}"><el-button link type="primary" @click="emit('permission',row)">菜单授权</el-button><el-button link type="primary" @click="emit('field-permission',row)">列权限</el-button><el-button link type="primary" @click="emit('edit',row)">编辑</el-button><el-button link @click="emit('toggle',row)">{{row.enabled?'禁用':'启用'}}</el-button><el-button link type="danger" @click="emit('remove',row)">删除</el-button></template></CrudTable></template>

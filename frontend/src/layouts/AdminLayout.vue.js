@@ -4,10 +4,21 @@ import { useAuthStore } from '../stores/auth';
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
-const menus = [{ path: '/customers', label: '客户管理', permission: 'customer:read' }, { path: '/users', label: '用户管理', permission: 'system:user:read' }, { path: '/roles', label: '角色管理', permission: 'system:user:read' }, { path: '/menus', label: '菜单管理', permission: 'system:user:read' }, { path: '/logs', label: '操作日志', permission: 'system:user:read' }];
-const visibleMenus = computed(() => menus.filter(m => auth.hasPermission(m.permission)));
-const breadcrumb = computed(() => menus.find(m => m.path === route.path)?.label || '管理控制台');
-function logout() { auth.clearSession(); router.replace('/login'); }
+const menus = [
+    { path: '/customers', label: '客户管理', permission: 'customer:read' },
+    { path: '/users', label: '用户管理', permission: 'system:user:read' },
+    { path: '/roles', label: '角色管理', permission: 'system:role:read' },
+    { path: '/menus', label: '菜单管理', permission: 'system:menu:read' },
+    { path: '/departments', label: '组织部门', permission: 'system:user:read' },
+    { path: '/dictionaries', label: '字典管理', permission: 'system:user:read' },
+    { path: '/logs', label: '操作日志', permission: 'audit:read' },
+];
+const visibleMenus = computed(() => menus.filter((m) => auth.hasPermission(m.permission)));
+const breadcrumb = computed(() => menus.find((m) => m.path === route.path)?.label || '管理控制台');
+function logout() {
+    auth.clearSession();
+    router.replace('/login');
+}
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
 let __VLS_components;

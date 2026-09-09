@@ -1,11 +1,10 @@
 package com.moyucloud.auth.service;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,7 @@ public class JwtTokenService {
     }
 
     /** 创建有效期为八小时的访问令牌。 */
-    public String createToken(Long userId, String username) {
+    public String createToken(String userId, String username) {
         Instant expiresAt = Instant.now().plus(8, ChronoUnit.HOURS);
         return Jwts.builder()
                 .subject(String.valueOf(userId))
@@ -40,14 +39,19 @@ public class JwtTokenService {
     }
 
     /** 校验令牌并返回其中的用户编号。 */
-    public Long parseUserId(String authorization) {
+    public String parseUserId(String authorization) {
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "请先登录");
         }
         try {
-            String subject = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes())).build()
-                    .parseSignedClaims(authorization.substring(BEARER_PREFIX.length())).getPayload().getSubject();
-            return Long.valueOf(subject);
+            String subject =
+                    Jwts.parser()
+                            .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+                            .build()
+                            .parseSignedClaims(authorization.substring(BEARER_PREFIX.length()))
+                            .getPayload()
+                            .getSubject();
+            return subject;
         } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "登录已失效", exception);
         }

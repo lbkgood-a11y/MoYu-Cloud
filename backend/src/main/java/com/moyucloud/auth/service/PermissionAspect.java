@@ -19,8 +19,10 @@ public class PermissionAspect {
     }
 
     @Around("@annotation(requiresPermission)")
-    public Object check(ProceedingJoinPoint joinPoint, RequiresPermission requiresPermission) throws Throwable {
-        authService.requirePermission(request.getHeader("Authorization"), requiresPermission.value());
+    public Object check(ProceedingJoinPoint joinPoint, RequiresPermission requiresPermission)
+            throws Throwable {
+        authService.requirePermission(
+                request.getHeader("Authorization"), requiresPermission.value());
         return joinPoint.proceed();
     }
 }

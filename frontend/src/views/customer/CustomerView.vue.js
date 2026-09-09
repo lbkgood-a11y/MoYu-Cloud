@@ -14,40 +14,50 @@ const total = ref(0);
 const loading = ref(false);
 const dialog = ref(false);
 const editing = ref(null);
-async function load() { loading.value = true; try {
-    const result = (await fetchCustomers(keyword.value, page.value, size.value)).data.data;
-    customers.value = result.items;
-    total.value = result.total;
+async function load() {
+    loading.value = true;
+    try {
+        const result = (await fetchCustomers(keyword.value, page.value, size.value)).data.data;
+        customers.value = result.items;
+        total.value = result.total;
+    }
+    catch {
+        ElMessage.error('客户数据加载失败');
+    }
+    finally {
+        loading.value = false;
+    }
 }
-catch {
-    ElMessage.error('客户数据加载失败');
+function openForm(customer) {
+    editing.value = customer ?? null;
+    dialog.value = true;
 }
-finally {
-    loading.value = false;
-} }
-function openForm(customer) { editing.value = customer ?? null; dialog.value = true; }
-async function save(payload) { try {
-    if (editing.value)
-        await updateCustomer(editing.value.id, payload);
-    else
-        await createCustomer(payload);
-    dialog.value = false;
-    ElMessage.success('保存成功');
-    await load();
+async function save(payload) {
+    try {
+        if (editing.value)
+            await updateCustomer(editing.value.id, payload);
+        else
+            await createCustomer(payload);
+        dialog.value = false;
+        ElMessage.success('保存成功');
+        await load();
+    }
+    catch {
+        ElMessage.error('保存失败');
+    }
 }
-catch {
-    ElMessage.error('保存失败');
-} }
-async function remove(customer) { try {
-    await ElMessageBox.confirm(`确定删除客户“${customer.name}”吗？`, '删除确认', { type: 'warning' });
-    await deleteCustomer(customer.id);
-    ElMessage.success('删除成功');
-    await load();
+async function remove(customer) {
+    try {
+        await ElMessageBox.confirm(`确定删除客户“${customer.name}”吗？`, '删除确认', { type: 'warning' });
+        await deleteCustomer(customer.id);
+        ElMessage.success('删除成功');
+        await load();
+    }
+    catch (error) {
+        if (error !== 'cancel' && error !== 'close')
+            ElMessage.error('删除失败');
+    }
 }
-catch (error) {
-    if (error !== 'cancel' && error !== 'close')
-        ElMessage.error('删除失败');
-} }
 onMounted(load);
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
@@ -162,6 +172,7 @@ const __VLS_39 = {
     onClick: (...[$event]) => {
         __VLS_ctx.page = 1;
         __VLS_ctx.load();
+        ;
     }
 };
 __VLS_35.slots.default;
@@ -216,6 +227,7 @@ const __VLS_54 = {
     'onUpdate:page': (...[$event]) => {
         __VLS_ctx.page = $event;
         __VLS_ctx.load();
+        ;
     }
 };
 const __VLS_55 = {
@@ -223,6 +235,7 @@ const __VLS_55 = {
         __VLS_ctx.size = $event;
         __VLS_ctx.page = 1;
         __VLS_ctx.load();
+        ;
     }
 };
 var __VLS_50;

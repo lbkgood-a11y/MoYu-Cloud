@@ -3,21 +3,24 @@ import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { api } from '../api';
 import { useAuthStore } from '../stores/auth';
-const router = useRouter(), route = useRoute(), auth = useAuthStore(), username = ref('admin'), password = ref('admin12345'), loading = ref(false);
-async function submit() { loading.value = true; try {
-    const r = (await api.post('/auth/login', { username: username.value, password: password.value })).data.data;
-    auth.setSession(r.accessToken, [], username.value);
-    const me = (await api.get('/auth/me')).data.data;
-    auth.setPermissions(me.permissions || []);
-    router.replace(route.query.redirect || '/customers');
+const router = useRouter(), route = useRoute(), auth = useAuthStore(), username = ref('admin'), password = ref('admin123'), loading = ref(false);
+async function submit() {
+    loading.value = true;
+    try {
+        const r = (await api.post('/auth/login', { username: username.value, password: password.value })).data.data;
+        auth.setSession(r.accessToken, [], username.value);
+        const me = (await api.get('/auth/me')).data.data;
+        auth.setPermissions(me.permissions || []);
+        router.replace(route.query.redirect || '/customers');
+    }
+    catch {
+        auth.clearSession();
+        ElMessage.error('登录失败，请检查账号和密码');
+    }
+    finally {
+        loading.value = false;
+    }
 }
-catch {
-    auth.clearSession();
-    ElMessage.error('登录失败，请检查账号和密码');
-}
-finally {
-    loading.value = false;
-} }
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
 let __VLS_components;

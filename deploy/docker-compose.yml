@@ -35,6 +35,11 @@ services:
       MOYU_ADMIN_PASSWORD: ${MOYU_ADMIN_PASSWORD:?请设置 MOYU_ADMIN_PASSWORD}
     ports:
       - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/api/health | grep -q 'moyu-cloud-backend'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
 volumes:
   moyu-mysql-data:

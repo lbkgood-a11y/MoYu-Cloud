@@ -2,8 +2,15 @@ import { reactive, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 const props = defineProps();
 const emit = defineEmits();
-const form = reactive({ parentId: 0, menuName: '', permission: '', menuType: 'M' });
-watch(() => props.menu, (value) => Object.assign(form, value ? { parentId: value.parentId, menuName: value.menuName, permission: value.permission || '', menuType: value.menuType } : { parentId: 0, menuName: '', permission: '', menuType: 'M' }), { immediate: true });
+const form = reactive({ parentId: '0', menuName: '', permission: '', menuType: 'M' });
+watch(() => props.menu, (value) => Object.assign(form, value
+    ? {
+        parentId: value.parentId,
+        menuName: value.menuName,
+        permission: value.permission || '',
+        menuType: value.menuType,
+    }
+    : { parentId: '0', menuName: '', permission: '', menuType: 'M' }), { immediate: true });
 function submit() {
     if (!form.menuName.trim()) {
         ElMessage.warning('菜单名称不能为空');

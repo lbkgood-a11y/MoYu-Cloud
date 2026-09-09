@@ -14,27 +14,40 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
     /** 处理参数校验失败。 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException exception) {
-        String message = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getDefaultMessage()).collect(Collectors.joining("；"));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, message, "VALIDATION_ERROR"));
+    public ResponseEntity<ApiResponse<Void>> handleValidation(
+            MethodArgumentNotValidException exception) {
+        String message =
+                exception.getBindingResult().getFieldErrors().stream()
+                        .map(error -> error.getDefaultMessage())
+                        .collect(Collectors.joining("；"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, null, message, "VALIDATION_ERROR"));
     }
+
     /** 处理主动抛出的 HTTP 异常。 */
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResponseStatus(ResponseStatusException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatus(
+            ResponseStatusException exception) {
         HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
         if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
-        String code = switch (status) {
-            case UNAUTHORIZED -> "AUTH_REQUIRED";
-            case FORBIDDEN -> "PERMISSION_DENIED";
-            case NOT_FOUND -> "RESOURCE_NOT_FOUND";
-            case BAD_REQUEST -> "VALIDATION_ERROR";
-            case CONFLICT -> "DUPLICATE_RESOURCE";
-            default -> "INTERNAL_ERROR";
-        };
-        return ResponseEntity.status(status).body(new ApiResponse<>(false, null,
-                exception.getReason() == null ? "请求失败" : exception.getReason(), code));
+        String code =
+                switch (status) {
+                    case UNAUTHORIZED -> "AUTH_REQUIRED";
+                    case FORBIDDEN -> "PERMISSION_DENIED";
+                    case NOT_FOUND -> "RESOURCE_NOT_FOUND";
+                    case BAD_REQUEST -> "VALIDATION_ERROR";
+                    case CONFLICT -> "DUPLICATE_RESOURCE";
+                    default -> "INTERNAL_ERROR";
+                };
+        return ResponseEntity.status(status)
+                .body(
+                        new ApiResponse<>(
+                                false,
+                                null,
+                                exception.getReason() == null ? "请求失败" : exception.getReason(),
+                                code));
     }
+
     /** 处理未预期异常。 */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

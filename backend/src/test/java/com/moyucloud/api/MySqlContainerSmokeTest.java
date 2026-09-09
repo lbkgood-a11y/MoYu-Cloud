@@ -12,8 +12,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @EnabledIfEnvironmentVariable(named = "RUN_MYSQL_TESTS", matches = "true")
 class MySqlContainerSmokeTest {
-    @Container
-    static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
+    @Container static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
 
     @Test
     void mysqlContainerStarts() {

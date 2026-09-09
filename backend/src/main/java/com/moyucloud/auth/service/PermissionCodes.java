@@ -4,7 +4,11 @@ package com.moyucloud.auth.service;
 public final class PermissionCodes {
     public static final String SYSTEM_USER_READ = "system:user:read";
     public static final String SYSTEM_USER_WRITE = "system:user:write";
+    public static final String SYSTEM_ROLE_READ = "system:role:read";
+    public static final String SYSTEM_ROLE_WRITE = "system:role:write";
     public static final String CUSTOMER_READ = "customer:read";
     public static final String CUSTOMER_WRITE = "customer:write";
-    private PermissionCodes() { }
+    public static final String AUDIT_READ = "audit:read";
+
+    private PermissionCodes() {}
 }

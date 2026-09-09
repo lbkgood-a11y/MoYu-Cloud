@@ -1,7 +1,7 @@
 import { api } from '../api';
 
 export interface Customer {
-  id: number;
+  id: string;
   name: string;
   contact: string;
   phone: string;
@@ -16,9 +16,21 @@ export interface PageResult<T> {
 }
 
 export function fetchCustomers(keyword: string, page: number, size: number) {
-  return api.get<{ data: PageResult<Customer> }>('/customers/page', { params: { keyword: keyword || undefined, page, size } });
+  return api.get<{ data: PageResult<Customer> }>('/customers/page', {
+    params: { keyword: keyword || undefined, page, size },
+  });
 }
 
-export function createCustomer(payload: Omit<Customer, 'id'>) { return api.post('/customers', payload); }
-export function updateCustomer(id: number, payload: Omit<Customer, 'id'>) { return api.put(`/customers/${id}`, payload); }
-export function deleteCustomer(id: number) { return api.delete(`/customers/${id}`); }
+export function createCustomer(payload: Omit<Customer, 'id'>) {
+  return api.post('/customers', payload);
+}
+export function updateCustomer(id: string, payload: Omit<Customer, 'id'>) {
+  return api.put(`/customers/${id}`, payload);
+}
+export function deleteCustomer(id: string) {
+  return api.delete(`/customers/${id}`);
+}
+export function fetchCustomerDetail(id: string) { return api.get(`/customers/${id}`); }
+export function exportCustomers() {
+  return api.get('/customers/export', { responseType: 'blob' });
+}

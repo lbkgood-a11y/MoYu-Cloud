@@ -32,7 +32,8 @@ public class AuthController {
 
     /** 获取当前登录用户。 */
     @GetMapping("/me")
-    public ApiResponse<CurrentUserResponse> me(@RequestHeader(value = "Authorization", required = false) String authorization) {
+    public ApiResponse<CurrentUserResponse> me(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
         return ApiResponse.success(authService.currentUser(authorization));
     }
 }

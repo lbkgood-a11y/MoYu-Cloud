@@ -1,0 +1,4 @@
+node_modules/
+dist/
+*.vue.js
+*.spec.js

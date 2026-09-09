@@ -1,13 +1,1 @@
-<script setup lang="ts">
-import { reactive } from 'vue';
-import { ElMessage } from 'element-plus';
-defineProps<{ modelValue: boolean }>();
-const emit = defineEmits<{ (e: 'update:modelValue', value: boolean): void; (e: 'save', value: { username: string; password: string }): void }>();
-const form = reactive({ username: '', password: '' });
-function submit() {
-  if (!form.username.trim()) { ElMessage.warning('用户名不能为空'); return; }
-  if (form.password.length < 6) { ElMessage.warning('密码至少需要 6 位'); return; }
-  emit('save', { ...form });
-}
-</script>
-<template><el-dialog :model-value="modelValue" title="新增用户" width="400px" @update:model-value="emit('update:modelValue', $event)"><el-form label-width="70px"><el-form-item label="用户名"><el-input v-model="form.username" /></el-form-item><el-form-item label="密码"><el-input v-model="form.password" type="password" show-password /></el-form-item></el-form><template #footer><el-button @click="emit('update:modelValue', false)">取消</el-button><el-button type="primary" @click="submit">保存</el-button></template></el-dialog></template>
+<script setup lang="ts">import{ref}from'vue';import{ElMessage}from'element-plus';import CrudForm from './crud/CrudForm.vue';const props=defineProps<{modelValue:boolean;departments?:{id:string;name:string}[]}>();const emit=defineEmits<{(e:'update:modelValue',v:boolean):void;(e:'save',v:any):void}>();const model=ref<any>({username:'',password:'',departmentId:''});const fields=[{code:'username',label:'用户名',type:'text',required:true,editable:true},{code:'password',label:'密码',type:'text',required:true,editable:true},{code:'departmentId',label:'部门',type:'select',editable:true}];function submit(){if(!model.value.username||model.value.password.length<8){ElMessage.warning('请填写用户名，密码至少 8 位');return}emit('save',{...model.value,departmentId:model.value.departmentId||undefined})}</script><template><CrudForm :model-value="modelValue" title="新增用户" :fields="fields" :model="model" :remote-options="{departmentId:(props.departments||[]).map(d=>({label:d.name,value:d.id}))}" @update:model-value="emit('update:modelValue',$event)" @update:model="model=$event" @submit="submit"/></template>

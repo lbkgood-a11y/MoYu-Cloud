@@ -15,7 +15,8 @@ public class AdminInitializer implements CommandLineRunner {
     private final String adminUsername;
     private final String adminPassword;
 
-    public AdminInitializer(UserRepository userRepository,
+    public AdminInitializer(
+            UserRepository userRepository,
             @Value("${moyu.admin.username:}") String adminUsername,
             @Value("${moyu.admin.password:}") String adminPassword) {
         this.userRepository = userRepository;
@@ -30,7 +31,8 @@ public class AdminInitializer implements CommandLineRunner {
             return;
         }
         if (userRepository.findByUsername(adminUsername).isEmpty()) {
-            userRepository.save(new UserEntity(adminUsername, passwordEncoder.encode(adminPassword)));
+            userRepository.save(
+                    new UserEntity(adminUsername, passwordEncoder.encode(adminPassword)));
         }
     }
 }

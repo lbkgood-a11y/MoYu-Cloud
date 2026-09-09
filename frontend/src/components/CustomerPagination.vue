@@ -1,6 +1,9 @@
 <script setup lang="ts">
 defineProps<{ page: number; size: number; total: number }>();
-const emit = defineEmits<{ (event: 'update:page', value: number): void; (event: 'update:size', value: number): void }>();
+const emit = defineEmits<{
+  (event: 'update:page', value: number): void;
+  (event: 'update:size', value: number): void;
+}>();
 </script>
 
 <template>

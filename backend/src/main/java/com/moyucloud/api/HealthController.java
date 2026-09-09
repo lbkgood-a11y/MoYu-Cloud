@@ -17,6 +17,5 @@ public class HealthController {
     }
 
     /** 健康检查响应。 */
-    public record HealthResponse(String status, String service) {
-    }
+    public record HealthResponse(String status, String service) {}
 }
