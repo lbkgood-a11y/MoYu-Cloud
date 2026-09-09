@@ -5,10 +5,14 @@ import { api } from '../../api';
 import MenuForm from '../../components/MenuForm.vue';
 import { useAuthStore } from '../../stores/auth';
 import CrudToolbar from '../../components/CrudToolbar.vue';
+import { DataAnalysis, Document, Files, Key, Menu as MenuIcon, Monitor, Setting, User, UserFilled } from '@element-plus/icons-vue';
 const auth = useAuthStore();
 const menus = ref<any[]>([]);
 const dialog = ref(false);
 const editing = ref<any | null>(null);
+const selectedId = ref<string | null>(null);
+const selectedLabel = ref('全部菜单');
+const iconMap: Record<string, any> = { DataAnalysis, Document, Files, Key, Menu: MenuIcon, Monitor, Setting, User, UserFilled };
 /** 将菜单平面数据组装为树形数据。 */
 const menuTree = computed(() => {
   const nodes = menus.value.map((menu) => ({ ...menu, children: [] as any[] }));
@@ -19,6 +23,13 @@ const menuTree = computed(() => {
     else roots.push(node);
   });
   return roots;
+});
+const visibleMenus = computed(() => {
+  if (!selectedId.value) return menus.value;
+  const ids = new Set<string>();
+  const collect = (id: string) => { ids.add(id); menus.value.filter((m) => m.parentId === id).forEach((m) => collect(m.id)); };
+  collect(selectedId.value);
+  return menus.value.filter((m) => ids.has(m.id));
 });
 async function load() {
   try {
@@ -71,17 +82,8 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <el-card
-    ><template #header
-      ><CrudToolbar title="菜单管理"><el-button v-permission="'system:user:write'" type="primary" @click="openCreate">新增菜单</el-button></CrudToolbar></template
-    ><el-tree
-      class="menu-tree"
-      node-key="id"
-      default-expand-all
-      :data="menuTree"
-      :props="{ label: 'menuName', children: 'children' }"
-    /><el-table :data="menus" stripe
-      ><el-table-column prop="id" label="编号" width="90" /><el-table-column
+  <div class="menu-layout"><el-card class="tree-card" shadow="never"><template #header><div class="tree-header"><span>菜单结构</span><el-button link type="primary" @click="selectedId = null; selectedLabel = '全部菜单'">查看全部</el-button></div></template><el-scrollbar class="tree-scroll"><el-tree node-key="id" default-expand-all highlight-current :data="menuTree" :props="{ label: 'menuName', children: 'children' }" @node-click="(data) => { selectedId = data.id; selectedLabel = data.menuName; }" /></el-scrollbar></el-card><el-card class="list-card" shadow="never"><template #header><div class="header"><div><div class="list-title">{{ selectedLabel }}</div><div class="list-subtitle">共 {{ visibleMenus.length }} 个菜单</div></div><el-button v-permission="'system:user:write'" type="primary" @click="openCreate">新增菜单</el-button></div></template><el-table :data="visibleMenus" stripe
+      ><el-table-column label="菜单" min-width="180"><template #default="s"><div class="menu-name"><el-icon><component :is="iconMap[s.row.icon] || MenuIcon" /></el-icon><span>{{ s.row.menuName }}</span></div></template></el-table-column><el-table-column
         prop="menuName"
         label="菜单名称"
       /><el-table-column prop="permission" label="权限标识" /><el-table-column
@@ -98,14 +100,14 @@ onMounted(async () => {
           ><el-button link @click="toggle(s.row)">{{ s.row.enabled ? '禁用' : '启用' }}</el-button
           ><el-button link type="danger" @click="remove(s.row)">删除</el-button></template
         ></el-table-column
-      ></el-table
-    ></el-card
-  ><MenuForm v-model="dialog" :menu="editing" @save="save" />
+      ></el-table></el-card></div><MenuForm v-model="dialog" :menu="editing" :menus="menus" @save="save" />
 </template>
 <style scoped>
+.menu-name{display:flex;align-items:center;gap:8px}.menu-name .el-icon{color:#2563eb}
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.menu-layout{display:flex;gap:16px}.tree-card{width:250px;flex:0 0 250px}.list-card{min-width:0;flex:1}.tree-scroll{max-height:calc(100vh - 260px)}.tree-header{display:flex;justify-content:space-between;align-items:center}.list-title{font-size:16px;font-weight:600}.list-subtitle{color:var(--el-text-color-secondary);font-size:12px;margin-top:4px}@media (max-width:768px){.menu-layout{flex-direction:column}.tree-card{width:auto;flex-basis:auto}.tree-scroll{max-height:240px}}
 </style>
