@@ -2,6 +2,7 @@ package com.moyucloud.dictionary.domain;
 
 import com.moyucloud.shared.Ulid;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "sys_dict_item")
@@ -12,6 +13,7 @@ public class DictionaryItemEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", nullable = false)
+    @JsonIgnore
     private DictionaryTypeEntity type;
 
     @Column(nullable = false, length = 80)

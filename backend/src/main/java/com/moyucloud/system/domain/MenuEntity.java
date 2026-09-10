@@ -19,6 +19,7 @@ public class MenuEntity {
 
     private String menuName;
     private String permission;
+    private String icon;
 
     @jakarta.persistence.Column(length = 1, columnDefinition = "char(1)")
     private String menuType;
@@ -33,11 +34,12 @@ public class MenuEntity {
     }
 
     /** 创建菜单权限实体。 */
-    public MenuEntity(String parentId, String menuName, String permission, String menuType) {
+    public MenuEntity(String parentId, String menuName, String permission, String menuType, String icon) {
         this.parentId = parentId;
         this.menuName = menuName;
         this.permission = permission;
         this.menuType = menuType;
+        this.icon = icon;
         this.enabled = true;
     }
 
@@ -60,16 +62,18 @@ public class MenuEntity {
     public String getMenuType() {
         return menuType;
     }
+    public String getIcon() { return icon; }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public void update(String parentId, String menuName, String permission, String menuType) {
+    public void update(String parentId, String menuName, String permission, String menuType, String icon) {
         this.parentId = parentId;
         this.menuName = menuName;
         this.permission = permission;
         this.menuType = menuType;
+        this.icon = icon;
     }
 
     public void setEnabled(boolean enabled) {

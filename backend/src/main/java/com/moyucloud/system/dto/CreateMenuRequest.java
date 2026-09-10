@@ -8,4 +8,5 @@ public record CreateMenuRequest(
         @NotNull(message = "父菜单编号不能为空") String parentId,
         @NotBlank(message = "菜单名称不能为空") String menuName,
         String permission,
-        @NotBlank(message = "菜单类型不能为空") String menuType) {}
+        @NotBlank(message = "菜单类型不能为空") String menuType,
+        String icon) {}

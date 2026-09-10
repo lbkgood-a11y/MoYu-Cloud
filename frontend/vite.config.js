@@ -3,5 +3,5 @@ import vue from '@vitejs/plugin-vue';
 /** Vite 开发服务器配置。 */
 export default defineConfig({
   plugins: [vue()],
-  server: { port: 5173, proxy: { '/api': 'http://localhost:8080' } },
+  server: { port: 5173, proxy: { '/api': 'http://127.0.0.1:8080' } },
 });

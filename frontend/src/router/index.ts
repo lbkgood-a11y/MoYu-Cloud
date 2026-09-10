@@ -67,6 +67,12 @@ export const router = createRouter({
           component: ModelingView,
           meta: { permission: routePermissions.departments },
         },
+        {
+          path: 'modeling/tables',
+          name: 'modeling-tables',
+          component: ModelingView,
+          meta: { permission: routePermissions.departments },
+        },
         { path: 'logs', name: 'logs', component: OperationLogView, meta: { permission: routePermissions.logs } },
       ],
     },

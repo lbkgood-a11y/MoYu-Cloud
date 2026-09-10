@@ -10,7 +10,6 @@ import ResetPasswordForm from '../../components/ResetPasswordForm.vue';
 import CustomerPagination from '../../components/CustomerPagination.vue';
 import { useAuthStore } from '../../stores/auth';
 import CrudToolbar from '../../components/CrudToolbar.vue';
-import CrudForm from '../../components/crud/CrudForm.vue';
 import { fetchDepartments } from '../../api/department';
 const auth = useAuthStore();
 const users = ref<any[]>([]);

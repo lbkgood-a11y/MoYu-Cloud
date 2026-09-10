@@ -20,7 +20,7 @@ public class DictionaryTypeEntity {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DictionaryItemEntity> items = new ArrayList<>();
 
     protected DictionaryTypeEntity() {}

@@ -1,10 +1,10 @@
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM mirror.gcr.io/library/maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
 RUN mvn -q -DskipTests package
 
-FROM eclipse-temurin:17-jre-jammy
+FROM mirror.gcr.io/library/eclipse-temurin:17-jre-jammy
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \

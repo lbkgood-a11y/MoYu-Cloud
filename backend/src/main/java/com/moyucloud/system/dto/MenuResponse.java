@@ -7,4 +7,5 @@ public record MenuResponse(
         String menuName,
         String permission,
         String menuType,
+        String icon,
         boolean enabled) {}

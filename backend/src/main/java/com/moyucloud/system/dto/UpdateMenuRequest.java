@@ -7,4 +7,5 @@ public record UpdateMenuRequest(
         @NotNull String parentId,
         @NotBlank String menuName,
         String permission,
-        @NotBlank String menuType) {}
+        @NotBlank String menuType,
+        String icon) {}

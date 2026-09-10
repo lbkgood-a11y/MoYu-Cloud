@@ -3,9 +3,7 @@ import { onMounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../../stores/auth';
 import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer, batchDeleteCustomers, exportCustomers, fetchCustomerDetail, type Customer } from '../../api/customer';
-import CustomerTable from '../../components/CustomerTable.vue';
 import CustomerPagination from '../../components/CustomerPagination.vue';
-import CustomerForm from '../../components/CustomerForm.vue';
 import CrudToolbar from '../../components/CrudToolbar.vue';
 import CrudQuery from '../../components/crud/CrudQuery.vue';
 import CrudTable from '../../components/crud/CrudTable.vue';
@@ -67,7 +65,7 @@ async function remove(customer: Customer) {
     if (error !== 'cancel' && error !== 'close') ElMessage.error('删除失败');
   }
 }
-async function exportData(){try{const r=await exportCustomers();const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='customers.csv';a.click();URL.revokeObjectURL(url);ElMessage.success('导出成功')}catch{ElMessage.error('导出失败')}}
+async function exportData(){try{const r=await exportCustomers();const browser=globalThis as any;const url=browser.URL.createObjectURL(r.data);const a=browser.document.createElement('a');a.href=url;a.download='customers.csv';a.click();browser.URL.revokeObjectURL(url);ElMessage.success('导出成功')}catch{ElMessage.error('导出失败')}}
 async function openDetail(row:Customer){detailDialog.value=true;detailLoading.value=true;try{detail.value=(await fetchCustomerDetail(row.id)).data.data}catch{ElMessage.error('详情加载失败');detailDialog.value=false}finally{detailLoading.value=false}}
 async function batchRemove(){if(!selectedRows.value.length)return;try{await ElMessageBox.confirm(`确定删除选中的 ${selectedRows.value.length} 条客户吗？`,'批量删除确认',{type:'warning'});await batchDeleteCustomers(selectedRows.value.map(x=>x.id));selectedRows.value=[];await load();ElMessage.success('批量删除成功')}catch(e:any){if(e!=='cancel'&&e!=='close')ElMessage.error(e.message||'批量删除失败')}}
 onMounted(load);
@@ -103,4 +101,3 @@ onMounted(load);
   align-items: center;
 }
 </style>
-

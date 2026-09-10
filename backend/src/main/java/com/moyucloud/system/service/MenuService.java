@@ -32,6 +32,7 @@ public class MenuService {
                                         menu.getMenuName(),
                                         menu.getPermission(),
                                         menu.getMenuType(),
+                                        menu.getIcon(),
                                         menu.isEnabled()))
                 .toList();
     }
@@ -49,13 +50,14 @@ public class MenuService {
                                 request.parentId(),
                                 request.menuName(),
                                 request.permission(),
-                                request.menuType()));
+                                request.menuType(), request.icon()));
         return new MenuResponse(
                 menu.getId(),
                 menu.getParentId(),
                 menu.getMenuName(),
                 menu.getPermission(),
                 menu.getMenuType(),
+                menu.getIcon(),
                 menu.isEnabled());
     }
 
@@ -68,13 +70,14 @@ public class MenuService {
                                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "菜单不存在"));
         if (r.permission() != null && menuRepository.existsByPermissionAndIdNot(r.permission(), id))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "权限标识已存在");
-        m.update(r.parentId(), r.menuName(), r.permission(), r.menuType());
+        m.update(r.parentId(), r.menuName(), r.permission(), r.menuType(), r.icon());
         return new MenuResponse(
                 m.getId(),
                 m.getParentId(),
                 m.getMenuName(),
                 m.getPermission(),
                 m.getMenuType(),
+                m.getIcon(),
                 m.isEnabled());
     }
 
